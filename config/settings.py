@@ -25,9 +25,10 @@ INSTALLED_APPS = [
     "rest_framework",
     "corsheaders",
     "drf_spectacular",
+    "django_celery_beat",
     "user",
     "habit",
-    "django_celery_beat",
+
 ]
 
 MIDDLEWARE = [
