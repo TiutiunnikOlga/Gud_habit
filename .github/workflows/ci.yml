@@ -28,8 +28,10 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
-    - name: Run migrations
-      run: python manage.py migrate
+    - name: Run migrations and setup Celery
+      run: |
+        python manage.py migrate
+        python manage.py setup_celery
 
     - name: Run tests
       run: python manage.py test
