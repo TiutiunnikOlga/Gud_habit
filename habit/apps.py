@@ -1,23 +1,42 @@
 from django.apps import AppConfig
-from django.db import connection
 
 
 class HabitConfig(AppConfig):
     name = "habit"
 
     def ready(self):
+        from django.db import connection
+        from django.apps import apps
 
-        from django_celery_beat.models import IntervalSchedule, PeriodicTask
+        if not apps.ready:
+            return
 
-        if 'django_celery_beat_intervalschedule' in connection.introspection.table_names():
-            shedule, created = IntervalSchedule.objects.get_or_create(
+        table_names = connection.introspection.table_names()
+
+        required_tables = [
+            'django_celery_beat_intervalschedule',
+            'django_celery_beat_periodictask'
+        ]
+
+        if all(table in table_names for table in required_tables):
+
+            from django_celery_beat.models import IntervalSchedule, PeriodicTask
+
+            schedule, created = IntervalSchedule.objects.get_or_create(
                 every=1,
                 period=IntervalSchedule.HOURS,
             )
+
             PeriodicTask.objects.get_or_create(
-                interval=shedule,
+                interval=schedule,
                 name="Send habit reminders every hour",
                 task="habit.tasks.send_habit_reminder",
             )
         else:
-            print("Таблица django_celery_beat_intervalschedule не создана. Пропускаем инициализацию.")
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.info(
+                "Celery Beat tables not found. Skipping periodic task setup "
+                "(likely during migrations)."
+            )
+
