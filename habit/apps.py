@@ -19,24 +19,11 @@ class HabitConfig(AppConfig):
         ]
 
         if all(table in table_names for table in required_tables):
+            print("Tables found. Skipping setup for now.")
 
-            from django_celery_beat.models import IntervalSchedule, PeriodicTask
-
-            schedule, created = IntervalSchedule.objects.get_or_create(
-                every=1,
-                period=IntervalSchedule.HOURS,
-            )
-
-            PeriodicTask.objects.get_or_create(
-                interval=schedule,
-                name="Send habit reminders every hour",
-                task="habit.tasks.send_habit_reminder",
-            )
         else:
             import logging
             logger = logging.getLogger(__name__)
-            logger.info(
-                "Celery Beat tables not found. Skipping periodic task setup "
-                "(likely during migrations)."
-            )
+            logger.info("Tables not found. Migration in progress.")
+
 
