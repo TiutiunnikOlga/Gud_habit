@@ -72,7 +72,9 @@ jobs:
           DB_NAME: ${{ secrets.DB_NAME }}
 
       - name: Test DB connection
-        run: psql -h localhost -U ${DB_USER} -d ${DB_NAME} -c "SELECT 1;"
+        run: |
+          export PGPASSWORD="${DB_PASSWORD}"
+          psql -h localhost -U ${DB_USER} -d ${DB_NAME} -c "SELECT 1;"
         env:
           PASSWORD: ${{ secrets.DB_PASSWORD }}
           DB_USER: ${{ secrets.DB_USER }}
