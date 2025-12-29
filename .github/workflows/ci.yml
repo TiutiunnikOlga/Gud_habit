@@ -97,6 +97,7 @@ jobs:
           DB_NAME: ${{ secrets.DB_NAME }}
           DB_HOST: localhost
           DB_PORT: 5432
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
 
       - name: Run tests
         run: python manage.py test
