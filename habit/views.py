@@ -13,6 +13,7 @@ class RootView(APIView):
     def get(self, request):
         return Response({"message": "API is running"})
 
+
 class HabitViewSet(viewsets.ModelViewSet):
     serializer_class = HabitSerializer
     permission_classes = [permissions.IsAuthenticated]

@@ -10,6 +10,6 @@ router = DefaultRouter()
 router.register(r"habit", HabitViewSet, basename="habit")
 
 urlpatterns = [
-    path('', RootView.as_view(), name='root'),
+    path("", RootView.as_view(), name="root"),
     path("", include(router.urls)),
 ]
