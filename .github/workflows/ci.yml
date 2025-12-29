@@ -42,6 +42,13 @@ jobs:
           sudo service postgresql start
           sleep 10 
 
+      - name: Test DB connection
+        run: psql -h localhost -U ${DB_USER} -d ${DB_NAME} -c "SELECT 1;"
+        env:
+          PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+
       - name: Run migrations
         run: python manage.py migrate
         env:
