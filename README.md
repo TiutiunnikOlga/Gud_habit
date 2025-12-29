@@ -4,45 +4,38 @@
 
 Проект 'Трекер привычек' дает возможность приобрести полезную привычку, основан на книге Джеймса Клира "Атомные привычки"
 
+## Требования
+
+Docker и Docker Compose (версия не ниже 2.0)
+
+Python 3.10+ (для локальной разработки без Docker)
+
+git
+
 ## Установка
 
 1. Клонируйте репозиторий:
 
-[gitHub] (https://github.com/TiutiunnikOlga/Gud_habit)
+[gitHub] (https://github.com/TiutiunnikOlga/Gud_habit.git)
+cd Gud_habit
 
-2.1.
+Создайте файл .env на основе примера .env_sample
 
-        Бэкенд:
-            
-        Запусти команду curl http://localhost:8000/api/health.
-            
-        Убедись, что ответ содержит "status": "ok".
+3. Запустите контейнеры:
+ 
+docker-compose up -d
 
-    2.2. 
+4. Выполните миграции и создайте суперпользователя:
 
-        PostgreSQL:
-            
-        Используй команду psql -h localhost -U <username> -d <database> для подключения.
-            
-        Выполни простую команду, например, SELECT 1;, и проверь, что она выполняется успешно.
+docker-compose exec django python manage.py migrate
+docker-compose exec django python manage.py createsuperuser
 
-    2.3. 
+5. Проект доступен:
 
-        Redis:
-            
-        Выполни команду redis-cli -h localhost ping.
-            
-        Убедись, что ответ "PONG".
+Интерфейс: http://localhost:8000
 
-    2.4. 
+Админка Django: http://localhost:8000/admin
 
-        Celery:
-            
-            
-            
-        Убедись, что Celery воркеры запущены с помощью команды docker-compose logs celery.
-            
-        Проверь, что в логах нет ошибок.
 
 ## Использование
 
