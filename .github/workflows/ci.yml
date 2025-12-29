@@ -37,6 +37,17 @@ jobs:
       - name: Run Flake8
         run: flake8 . --config=.flake8
 
+      - name: Start PostgreSQL
+        run: |
+          sudo service postgresql start
+          sleep 10  # ждём инициализации
+
+          - name: Create test DB user and database
+            run: |
+              sudo -u postgres psql -c "CREATE USER ${{ secrets.DB_USER }} WITH PASSWORD '${secrets.DB_PASSWORD}';"
+              sudo -u postgres psql -c "CREATE DATABASE ${{ secrets.DB_NAME }};"
+              sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE ${{ secrets.DB_NAME }} TO ${{ secrets.DB_USER }};"
+
       - name: Run migrations
         run: python manage.py migrate
 
