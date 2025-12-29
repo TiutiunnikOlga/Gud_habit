@@ -8,6 +8,7 @@ on:
     branches:
       - develop
 
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -39,7 +40,7 @@ jobs:
       - name: Start PostgreSQL
         run: |
           sudo service postgresql start
-          sleep 10
+          sleep 10 
 
       - name: Create DB user and database
         run: |
@@ -53,26 +54,35 @@ jobs:
             echo "User ${DB_USER} already exists."
           fi
           DB_EXISTS=$(sudo -u postgres psql -tAc "SELECT 1 FROM pg_database WHERE datname='${DB_NAME}'")
-          if [ -z "$DB_EXISTS" ]; then
-            echo "Creating database ${DB_NAME}..."
-            sudo -u postgres psql -v ON_ERROR_STOP=1 -c "
-              CREATE DATABASE \"${DB_NAME}\" OWNER \"${DB_USER}\";
-            "
-          else
-            echo "Database ${DB_NAME} already exists."
-          fi
-          echo "Granting privileges..."
-          sudo -u postgres psql -v ON_ERROR_STOP=1 -c "
-            GRANT ALL PRIVILEGES ON DATABASE \"${DB_NAME}\" TO \"${DB_USER}\";
-          "
+            if [ -z "$DB_EXISTS" ]; then
+              echo "Creating database ${DB_NAME}..."
+              sudo -u postgres psql -v ON_ERROR_STOP=1 -c "
+                CREATE DATABASE \"${DB_NAME}\" OWNER \"${DB_USER}\";
+              "
+            else
+              echo "Database ${DB_NAME} already exists."
+            fi
+            echo "Granting privileges..."
+              sudo -u postgres psql -v ON_ERROR_STOP=1 -c "
+                GRANT ALL PRIVILEGES ON DATABASE \"${DB_NAME}\" TO \"${DB_USER}\";
+              "
         env:
           DB_USER: ${{ secrets.DB_USER }}
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           DB_NAME: ${{ secrets.DB_NAME }}
 
+      - name: Ensure DB user password
+        run: |
+          sudo -u postgres psql -v ON_ERROR_STOP=1 -c "
+            ALTER USER \"${DB_USER}\" WITH PASSWORD '${DB_PASSWORD}';
+          "
+        env:
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+
       - name: Debug password
         run:
-          echo "DB_PASSWORD length: ${DB_PASSWORD}"
+          echo "DB_PASSWORD length: ${#DB_PASSWORD}"
         env:
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
 
@@ -91,7 +101,7 @@ jobs:
           DB_USER: ${{ secrets.DB_USER }}
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           DB_NAME: ${{ secrets.DB_NAME }}
-          DB_HOST: 127.0.0.1
+          DB_HOST: localhost
           DB_PORT: 5432
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
 
@@ -101,7 +111,7 @@ jobs:
           DB_USER: ${{ secrets.DB_USER }}
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           DB_NAME: ${{ secrets.DB_NAME }}
-          DB_HOST: 127.0.0.1
+          DB_HOST: localhost
           DB_PORT: 5432
 
   build:
@@ -113,11 +123,10 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Log in in Docker hub
-        run: echo ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }} | docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} --password-stdin
-
+        run: echo ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }} | docker login -u ${{ secrets.DOCKER_HUB_USERNAME }}  --password-stdin
 
       - name: Build Docker image
-        run: docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/myapp:${{ github.sha }} ./Gud_habit/
+        run: docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/myapp:${{github.sha }} ./Gud_habit/
 
       - name: Push Docker image in Docker hub
         run: docker push ${{ secrets.DOCKER_HUB_USERNAME }}/myapp:${{ github.sha }}
