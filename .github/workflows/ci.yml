@@ -42,6 +42,18 @@ jobs:
           sudo service postgresql start
           sleep 10 
 
+      - name: Create DB user and database
+        run: |
+          sudo -u postgres psql -v ON_ERROR_STOP=1 -c "
+            CREATE USER IF NOT EXISTS \"${DB_USER}\" WITH PASSWORD '${DB_PASSWORD}';
+            CREATE DATABASE IF NOT EXISTS \"${DB_NAME}\" OWNER \"${DB_USER}\";
+            GRANT ALL PRIVILEGES ON DATABASE \"${DB_NAME}\" TO \"${DB_USER}\";
+          "
+        env:
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+
       - name: Test DB connection
         run: psql -h localhost -U ${DB_USER} -d ${DB_NAME} -c "SELECT 1;"
         env:
